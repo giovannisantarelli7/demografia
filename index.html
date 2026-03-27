@@ -110,10 +110,10 @@
         externalControl=true;
         applyProgress(next);
       }
-      section.addEventListener('wheel',handleWheel,{passive:false});
-      section.addEventListener('touchstart',handleTouchStart,{passive:true});
-      section.addEventListener('touchmove',handleTouchMove,{passive:false});
-      section.addEventListener('touchend',handleTouchEnd,{passive:true});
+      document.addEventListener('wheel',handleWheel,{passive:false});
+      document.addEventListener('touchstart',handleTouchStart,{passive:true});
+      document.addEventListener('touchmove',handleTouchMove,{passive:false});
+      document.addEventListener('touchend',handleTouchEnd,{passive:true});
       window.addEventListener('message',handleMessage);
       window.addEventListener('resize',()=>applyProgress(progress));
       applyProgress(0);
