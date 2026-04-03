@@ -92,31 +92,26 @@
       function setReveal(progress){ const currentProgress=clamp(progress,0,1); clipRect.setAttribute('width',innerWidth*currentProgress); const progress2016=(x2016-chartLeft)/innerWidth; const markerFactor=clamp((currentProgress-progress2016+.08)/.16,0,1); markerLine.setAttribute('opacity',.2+markerFactor*.8); markerText.setAttribute('opacity',.2+markerFactor*.8); markerBadge.setAttribute('opacity',.15+markerFactor*.85); }
       function setActiveStep(progress){ const thresholds=steps.map(step=>Number(step.dataset.progress||0)); let activeIndex=0; thresholds.forEach((value,index)=>{ if(progress>=value){ activeIndex=index; } }); steps.forEach((step,index)=>step.classList.toggle('is-active',index===activeIndex)); }
       let progress=0;
-      let externalControl=false;
-      const wheelRange=2200;
-      let touchStartY=null;
-      let touchStartProgress=0;
-      function applyProgress(nextProgress){ progress=clamp(nextProgress,0,1); setReveal(progress); setActiveStep(progress); }
-      function handleWheel(event){ if(externalControl) return; event.preventDefault(); applyProgress(progress+(event.deltaY/wheelRange)); }
-      function handleTouchStart(event){ if(externalControl || !event.touches.length) return; touchStartY=event.touches[0].clientY; touchStartProgress=progress; }
-      function handleTouchMove(event){ if(externalControl || touchStartY===null || !event.touches.length) return; event.preventDefault(); const delta=touchStartY-event.touches[0].clientY; applyProgress(touchStartProgress+(delta/wheelRange)); }
-      function handleTouchEnd(){ touchStartY=null; }
-      function handleMessage(event){
-        const payload=event.data;
-        if(!payload || typeof payload!=='object') return;
-        if(payload.type!=='timeline-progress') return;
-        const next=Number(payload.progress);
-        if(Number.isNaN(next)) return;
-        externalControl=true;
-        applyProgress(next);
-      }
-      document.addEventListener('wheel',handleWheel,{passive:false});
-      document.addEventListener('touchstart',handleTouchStart,{passive:true});
-      document.addEventListener('touchmove',handleTouchMove,{passive:false});
-      document.addEventListener('touchend',handleTouchEnd,{passive:true});
-      window.addEventListener('message',handleMessage);
-      window.addEventListener('resize',()=>applyProgress(progress));
-      applyProgress(0);
+function applyProgress(nextProgress){
+  progress=clamp(nextProgress,0,1);
+  setReveal(progress);
+  setActiveStep(progress);
+}
+
+function handleMessage(event){
+  const payload=event.data;
+  if(!payload || typeof payload!=='object') return;
+  if(payload.type!=='timeline-progress') return;
+
+  const next=Number(payload.progress);
+  if(Number.isNaN(next)) return;
+
+  applyProgress(next);
+}
+
+window.addEventListener('message',handleMessage);
+window.addEventListener('resize',()=>applyProgress(progress));
+applyProgress(0);
       return { setProgress: applyProgress };
     }
     createChart('storyAbsolute','svgAbsolute','hoverAbsolute','absolute');
